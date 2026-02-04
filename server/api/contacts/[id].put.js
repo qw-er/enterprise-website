@@ -1,11 +1,12 @@
-import { connectDB, Contact } from '../../utils/db.js'
+import connectDB from '../../utils/db.js'
+import Contact from '../../models/Contact.js'
 
 export default defineEventHandler(async (event) => {
   await connectDB()
 
   const id = getRouterParam(event, 'id')
   const body = await readBody(event)
-  const contact = await Contact.findByIdAndUpdate(id, body)
+  const contact = await Contact.findByIdAndUpdate(id, body, { new: true })
   
   if (!contact) {
     throw createError({

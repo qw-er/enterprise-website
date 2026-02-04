@@ -1,8 +1,6 @@
 declare global {
-  const Contact: typeof import('../../server/utils/db').Contact
   const H3Error: typeof import('../../node_modules/h3').H3Error
   const H3Event: typeof import('../../node_modules/h3').H3Event
-  const Product: typeof import('../../server/utils/db').Product
   const __buildAssetsURL: typeof import('../../node_modules/@nuxt/nitro-server/dist/runtime/utils/paths').buildAssetsURL
   const __publicAssetsURL: typeof import('../../node_modules/@nuxt/nitro-server/dist/runtime/utils/paths').publicAssetsURL
   const appendCorsHeaders: typeof import('../../node_modules/h3').appendCorsHeaders
@@ -17,13 +15,13 @@ declare global {
   const callNodeListener: typeof import('../../node_modules/h3').callNodeListener
   const clearResponseHeaders: typeof import('../../node_modules/h3').clearResponseHeaders
   const clearSession: typeof import('../../node_modules/h3').clearSession
-  const connectDB: typeof import('../../server/utils/db').connectDB
   const createApp: typeof import('../../node_modules/h3').createApp
   const createAppEventHandler: typeof import('../../node_modules/h3').createAppEventHandler
   const createError: typeof import('../../node_modules/h3').createError
   const createEvent: typeof import('../../node_modules/h3').createEvent
   const createEventStream: typeof import('../../node_modules/h3').createEventStream
   const createRouter: typeof import('../../node_modules/h3').createRouter
+  const db: typeof import('../../server/utils/db').default
   const defaultContentType: typeof import('../../node_modules/h3').defaultContentType
   const defineAppConfig: typeof import('../../node_modules/@nuxt/nitro-server/dist/runtime/utils/config').defineAppConfig
   const defineCachedEventHandler: typeof import('../../node_modules/nitropack/dist/runtime/internal/cache').defineCachedEventHandler
@@ -150,4 +148,4 @@ export { defineTask, runTask } from 'nitropack/runtime/internal/task';
 export { defineNitroErrorHandler } from 'nitropack/runtime/internal/error/utils';
 export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsURL } from 'D:/Xia/my/test/enterprise-website/node_modules/@nuxt/nitro-server/dist/runtime/utils/paths';
 export { defineAppConfig } from 'D:/Xia/my/test/enterprise-website/node_modules/@nuxt/nitro-server/dist/runtime/utils/config';
-export { connectDB, Product, Contact } from 'D:/Xia/my/test/enterprise-website/server/utils/db';
+export { default as db } from 'D:/Xia/my/test/enterprise-website/server/utils/db';

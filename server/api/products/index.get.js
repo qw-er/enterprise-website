@@ -1,8 +1,9 @@
-import { connectDB, Product } from '../../utils/db.js'
+import connectDB from '../../utils/db.js'
+import Product from '../../models/Product.js'
 
 export default defineEventHandler(async (event) => {
   await connectDB()
 
-  const products = await Product.find()
-  return products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  const products = await Product.find().sort({ createdAt: -1 })
+  return products
 })

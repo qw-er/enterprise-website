@@ -1,79 +1,40 @@
-let products = []
-let contacts = []
+import mongoose from 'mongoose'
 
-let productIdCounter = 1
-let contactIdCounter = 1
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/enterprise'
 
-export async function connectDB() {
-  return { connected: true }
+if (!MONGODB_URI) {
+  throw new Error('Please define MONGODB_URI environment variable')
 }
 
-export const Product = {
-  find: async () => {
-    return products
-  },
-  create: async (data) => {
-    const product = {
-      _id: String(productIdCounter++),
-      ...data,
-      createdAt: new Date()
-    }
-    products.push(product)
-    return product
-  },
-  findById: async (id) => {
-    return products.find(p => p._id === id)
-  },
-  findByIdAndUpdate: async (id, data) => {
-    const index = products.findIndex(p => p._id === id)
-    if (index !== -1) {
-      products[index] = { ...products[index], ...data }
-      return products[index]
-    }
-    return null
-  },
-  findByIdAndDelete: async (id) => {
-    const index = products.findIndex(p => p._id === id)
-    if (index !== -1) {
-      const deleted = products[index]
-      products.splice(index, 1)
-      return deleted
-    }
-    return null
+let cached = global.mongoose
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null }
+}
+
+async function connectDB() {
+  if (cached.conn) {
+    return cached.conn
   }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    }
+
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      return mongoose
+    })
+  }
+
+  try {
+    cached.conn = await cached.promise
+  } catch (e) {
+    cached.promise = null
+    throw e
+  }
+
+  return cached.conn
 }
 
-export const Contact = {
-  find: async () => {
-    return contacts
-  },
-  create: async (data) => {
-    const contact = {
-      _id: String(contactIdCounter++),
-      ...data,
-      createdAt: new Date()
-    }
-    contacts.push(contact)
-    return contact
-  },
-  findById: async (id) => {
-    return contacts.find(c => c._id === id)
-  },
-  findByIdAndUpdate: async (id, data) => {
-    const index = contacts.findIndex(c => c._id === id)
-    if (index !== -1) {
-      contacts[index] = { ...contacts[index], ...data }
-      return contacts[index]
-    }
-    return null
-  },
-  findByIdAndDelete: async (id) => {
-    const index = contacts.findIndex(c => c._id === id)
-    if (index !== -1) {
-      const deleted = contacts[index]
-      contacts.splice(index, 1)
-      return deleted
-    }
-    return null
-  }
-}
+export default connectDB

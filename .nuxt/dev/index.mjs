@@ -5,6 +5,7 @@ import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
 import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getResponseStatusText } from 'file://D:/Xia/my/test/enterprise-website/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://D:/Xia/my/test/enterprise-website/node_modules/@vue/shared/dist/shared.cjs.js';
+import mongoose from 'file://D:/Xia/my/test/enterprise-website/node_modules/mongoose/index.js';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://D:/Xia/my/test/enterprise-website/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://D:/Xia/my/test/enterprise-website/node_modules/ufo/dist/index.mjs';
 import destr, { destr as destr$1 } from 'file://D:/Xia/my/test/enterprise-website/node_modules/destr/dist/index.mjs';
@@ -2132,22 +2133,7 @@ const plugins = [
 _XUCxeqsIjf0pMLoIFSr5xjW9ed2aGLmZpe02Azj3ibI
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1e653-qZVjTpUlN1um2hO8ezUU9Lq56Q4\"",
-    "mtime": "2026-02-04T09:24:41.828Z",
-    "size": 124499,
-    "path": "index.mjs"
-  },
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"7878d-MTbTecTgdsK0vkP+SqLjr6kcSbU\"",
-    "mtime": "2026-02-04T09:24:41.828Z",
-    "size": 493453,
-    "path": "index.mjs.map"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2605,6 +2591,8 @@ const _aXIvLUMeta = null;
 
 const _Cg9TICMeta = null;
 
+const _TcHyLyMeta = null;
+
 const _vo86jBMeta = null;
 
 const _xEr4FrMeta = null;
@@ -2631,6 +2619,7 @@ const handlersMeta = [
 { route: "/api/contacts/:id", method: "put", meta: _vKNGDjMeta },
 { route: "/api/contacts", method: "get", meta: _aXIvLUMeta },
 { route: "/api/contacts", method: "post", meta: _Cg9TICMeta },
+{ route: "/api/data", method: "get", meta: _TcHyLyMeta },
 { route: "/api/products/:id", method: "delete", meta: _vo86jBMeta },
 { route: "/api/products/:id", method: "get", meta: _xEr4FrMeta },
 { route: "/api/products/:id", method: "put", meta: _3epR2QMeta },
@@ -2976,8 +2965,9 @@ const _zo16b2 = eventHandler((event) => {
 const _lazy_U1dbFu = () => Promise.resolve().then(function () { return _id__delete$3; });
 const _lazy_OzA_jI = () => Promise.resolve().then(function () { return _id__get$3; });
 const _lazy_vKNGDj = () => Promise.resolve().then(function () { return _id__put$3; });
-const _lazy_aXIvLU = () => Promise.resolve().then(function () { return index_get$3; });
+const _lazy_aXIvLU = () => Promise.resolve().then(function () { return index_get$5; });
 const _lazy_Cg9TIC = () => Promise.resolve().then(function () { return index_post$3; });
+const _lazy_TcHyLy = () => Promise.resolve().then(function () { return index_get$3; });
 const _lazy_vo86jB = () => Promise.resolve().then(function () { return _id__delete$1; });
 const _lazy_xEr4Fr = () => Promise.resolve().then(function () { return _id__get$1; });
 const _lazy_3epR2Q = () => Promise.resolve().then(function () { return _id__put$1; });
@@ -2992,6 +2982,7 @@ const handlers = [
   { route: '/api/contacts/:id', handler: _lazy_vKNGDj, lazy: true, middleware: false, method: "put" },
   { route: '/api/contacts', handler: _lazy_aXIvLU, lazy: true, middleware: false, method: "get" },
   { route: '/api/contacts', handler: _lazy_Cg9TIC, lazy: true, middleware: false, method: "post" },
+  { route: '/api/data', handler: _lazy_TcHyLy, lazy: true, middleware: false, method: "get" },
   { route: '/api/products/:id', handler: _lazy_vo86jB, lazy: true, middleware: false, method: "delete" },
   { route: '/api/products/:id', handler: _lazy_xEr4Fr, lazy: true, middleware: false, method: "get" },
   { route: '/api/products/:id', handler: _lazy_3epR2Q, lazy: true, middleware: false, method: "put" },
@@ -3342,81 +3333,55 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: styles
 }, Symbol.toStringTag, { value: 'Module' }));
 
-let products = [];
-let contacts = [];
-let productIdCounter = 1;
-let contactIdCounter = 1;
-async function connectDB() {
-  return { connected: true };
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/enterprise";
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
 }
-const Product = {
-  find: async () => {
-    return products;
-  },
-  create: async (data) => {
-    const product = {
-      _id: String(productIdCounter++),
-      ...data,
-      createdAt: /* @__PURE__ */ new Date()
-    };
-    products.push(product);
-    return product;
-  },
-  findById: async (id) => {
-    return products.find((p) => p._id === id);
-  },
-  findByIdAndUpdate: async (id, data) => {
-    const index = products.findIndex((p) => p._id === id);
-    if (index !== -1) {
-      products[index] = { ...products[index], ...data };
-      return products[index];
-    }
-    return null;
-  },
-  findByIdAndDelete: async (id) => {
-    const index = products.findIndex((p) => p._id === id);
-    if (index !== -1) {
-      const deleted = products[index];
-      products.splice(index, 1);
-      return deleted;
-    }
-    return null;
+async function connectDB() {
+  if (cached.conn) {
+    return cached.conn;
   }
-};
-const Contact = {
-  find: async () => {
-    return contacts;
-  },
-  create: async (data) => {
-    const contact = {
-      _id: String(contactIdCounter++),
-      ...data,
-      createdAt: /* @__PURE__ */ new Date()
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false
     };
-    contacts.push(contact);
-    return contact;
-  },
-  findById: async (id) => {
-    return contacts.find((c) => c._id === id);
-  },
-  findByIdAndUpdate: async (id, data) => {
-    const index = contacts.findIndex((c) => c._id === id);
-    if (index !== -1) {
-      contacts[index] = { ...contacts[index], ...data };
-      return contacts[index];
-    }
-    return null;
-  },
-  findByIdAndDelete: async (id) => {
-    const index = contacts.findIndex((c) => c._id === id);
-    if (index !== -1) {
-      const deleted = contacts[index];
-      contacts.splice(index, 1);
-      return deleted;
-    }
-    return null;
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose2) => {
+      return mongoose2;
+    });
   }
-};
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+  return cached.conn;
+}
+
+const ContactSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true
+  },
+  phone: {
+    type: String,
+    required: true
+  },
+  message: {
+    type: String,
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+const Contact = mongoose.models.Contact || mongoose.model("Contact", ContactSchema);
 
 const _id__delete$2 = defineEventHandler(async (event) => {
   await connectDB();
@@ -3458,7 +3423,7 @@ const _id__put$2 = defineEventHandler(async (event) => {
   await connectDB();
   const id = getRouterParam(event, "id");
   const body = await readBody(event);
-  const contact = await Contact.findByIdAndUpdate(id, body);
+  const contact = await Contact.findByIdAndUpdate(id, body, { new: true });
   if (!contact) {
     throw createError({
       statusCode: 404,
@@ -3473,15 +3438,15 @@ const _id__put$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty
   default: _id__put$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$2 = defineEventHandler(async (event) => {
+const index_get$4 = defineEventHandler(async (event) => {
   await connectDB();
-  const contacts = await Contact.find();
-  return contacts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const contacts = await Contact.find().sort({ createdAt: -1 });
+  return contacts;
 });
 
-const index_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$2
+  default: index_get$4
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const index_post$2 = defineEventHandler(async (event) => {
@@ -3494,6 +3459,55 @@ const index_post$2 = defineEventHandler(async (event) => {
 const index_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: index_post$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const ProductSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  price: {
+    type: Number,
+    required: true
+  },
+  category: {
+    type: String,
+    required: true
+  },
+  image: {
+    type: String,
+    default: ""
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+const Product = mongoose.models.Product || mongoose.model("Product", ProductSchema);
+
+const index_get$2 = defineEventHandler(async (event) => {
+  await connectDB();
+  const products = await Product.find();
+  const contacts = await Contact.find();
+  return {
+    products: {
+      count: products.length,
+      data: products
+    },
+    contacts: {
+      count: contacts.length,
+      data: contacts
+    }
+  };
+});
+
+const index_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__delete = defineEventHandler(async (event) => {
@@ -3536,7 +3550,7 @@ const _id__put = defineEventHandler(async (event) => {
   await connectDB();
   const id = getRouterParam(event, "id");
   const body = await readBody(event);
-  const product = await Product.findByIdAndUpdate(id, body);
+  const product = await Product.findByIdAndUpdate(id, body, { new: true });
   if (!product) {
     throw createError({
       statusCode: 404,
@@ -3553,8 +3567,8 @@ const _id__put$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty
 
 const index_get = defineEventHandler(async (event) => {
   await connectDB();
-  const products = await Product.find();
-  return products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const products = await Product.find().sort({ createdAt: -1 });
+  return products;
 });
 
 const index_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
