@@ -1,0 +1,21 @@
+{
+  "name": "enterprise-website",
+  "version": "1.0.0",
+  "description": "Enterprise website with Nuxt.js and MongoDB",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --max-old-space-size=4096 node_modules/nuxt/bin/nuxt.mjs dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "mongoose": "^9.1.5",
+    "nuxt": "^4.3.0"
+  }
+}
