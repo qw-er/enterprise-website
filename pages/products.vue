@@ -17,9 +17,9 @@
         <form @submit.prevent="addProduct">
           <input v-model="newProduct.name" type="text" placeholder="商品名称" required>
           <input v-model="newProduct.description" type="text" placeholder="商品描述" required>
-          <input v-model.number="newProduct.price" type="number" placeholder="价格" required>
+          <input v-model.number="newProduct.price" type="number" min="0" placeholder="价格" required>
           <input v-model="newProduct.category" type="text" placeholder="分类" required>
-          <input v-model="newProduct.image" type="text" placeholder="图片URL（可选）">
+          <input v-model="newProduct.image" type="text" placeholder="图片 URL（可选）">
           <button type="submit">添加商品</button>
         </form>
       </div>
@@ -37,8 +37,8 @@
             <p class="category">分类: {{ product.category }}</p>
             <p class="price">¥{{ product.price }}</p>
             <div class="actions">
-              <button @click="editProduct(product)" class="edit-btn">编辑</button>
-              <button @click="deleteProduct(product._id)" class="delete-btn">删除</button>
+              <button class="edit-btn" @click="editProduct(product)">编辑</button>
+              <button class="delete-btn" @click="deleteProduct(product._id)">删除</button>
             </div>
           </div>
         </div>
@@ -50,9 +50,9 @@
           <form @submit.prevent="updateProduct">
             <input v-model="editingProduct.name" type="text" placeholder="商品名称" required>
             <input v-model="editingProduct.description" type="text" placeholder="商品描述" required>
-            <input v-model.number="editingProduct.price" type="number" placeholder="价格" required>
+            <input v-model.number="editingProduct.price" type="number" min="0" placeholder="价格" required>
             <input v-model="editingProduct.category" type="text" placeholder="分类" required>
-            <input v-model="editingProduct.image" type="text" placeholder="图片URL（可选）">
+            <input v-model="editingProduct.image" type="text" placeholder="图片 URL（可选）">
             <div class="modal-actions">
               <button type="submit">保存</button>
               <button type="button" @click="editingProduct = null">取消</button>
@@ -63,7 +63,7 @@
     </main>
 
     <footer class="footer">
-      <p>&copy; 2024 企业官网. 保留所有权利.</p>
+      <p>&copy; 2024 企业官网. 保留所有权利。</p>
     </footer>
   </div>
 </template>
@@ -81,67 +81,84 @@ const newProduct = ref({
 })
 const editingProduct = ref(null)
 
+const getErrorMessage = (e, fallbackMessage) => {
+  return e?.data?.statusMessage || e?.statusMessage || fallbackMessage
+}
+
 useHead({
   title: '商品列表 - 企业官网',
   meta: [
     { name: 'description', content: '浏览我们的优质商品列表' },
-    { name: 'keywords', content: '商品,产品,厂家商品' }
+    { name: 'keywords', content: '商品,产品,企业商品' }
   ]
 })
 
 const fetchProducts = async () => {
+  error.value = null
+
   try {
-    const response = await $fetch('/api/products')
-    products.value = response
+    products.value = await $fetch('/api/products')
   } catch (e) {
-    error.value = '加载商品失败'
+    error.value = getErrorMessage(e, '加载商品失败')
   } finally {
     loading.value = false
   }
 }
 
 const addProduct = async () => {
+  error.value = null
+
   try {
     const response = await $fetch('/api/products', {
       method: 'POST',
       body: newProduct.value
     })
+
     products.value.unshift(response)
     newProduct.value = { name: '', description: '', price: 0, category: '', image: '' }
   } catch (e) {
-    error.value = '添加商品失败'
+    error.value = getErrorMessage(e, '添加商品失败')
   }
 }
 
 const editProduct = (product) => {
+  error.value = null
   editingProduct.value = { ...product }
 }
 
 const updateProduct = async () => {
+  error.value = null
+
   try {
     const response = await $fetch(`/api/products/${editingProduct.value._id}`, {
       method: 'PUT',
       body: editingProduct.value
     })
-    const index = products.value.findIndex(p => p._id === response._id)
+
+    const index = products.value.findIndex((product) => product._id === response._id)
     if (index !== -1) {
       products.value[index] = response
     }
+
     editingProduct.value = null
   } catch (e) {
-    error.value = '更新商品失败'
+    error.value = getErrorMessage(e, '更新商品失败')
   }
 }
 
 const deleteProduct = async (id) => {
   if (!confirm('确定要删除这个商品吗？')) return
+
+  error.value = null
+
   try {
     await $fetch(`/api/products/${id}`, {
       method: 'DELETE'
     })
-    products.value = products.value.filter(p => p._id !== id)
+
+    products.value = products.value.filter((product) => product._id !== id)
   } catch (e) {
-    error.value = '删除商品失败'
+    error.value = getErrorMessage(e, '删除商品失败')
   }
 }
 
@@ -242,7 +259,8 @@ onMounted(() => {
   box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
-.loading, .error {
+.loading,
+.error {
   text-align: center;
   padding: 2rem;
   font-size: 1.2rem;

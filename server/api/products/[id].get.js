@@ -1,11 +1,11 @@
 import connectDB from '../../utils/db.js'
-import Product from '../../models/Product.js'
+import { getProductById } from '../../services/productService.js'
 
 export default defineEventHandler(async (event) => {
   await connectDB()
 
   const id = getRouterParam(event, 'id')
-  const product = await Product.findById(id)
+  const product = await getProductById(id)
   
   if (!product) {
     throw createError({

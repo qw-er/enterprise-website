@@ -1,9 +1,13 @@
 import mongoose from 'mongoose'
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/enterprise'
+function getMongoUri() {
+  const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/enterprise'
 
-if (!MONGODB_URI) {
-  throw new Error('Please define MONGODB_URI environment variable')
+  if (!mongoUri) {
+    throw new Error('Please define MONGODB_URI environment variable')
+  }
+
+  return mongoUri
 }
 
 let cached = global.mongoose
@@ -22,7 +26,7 @@ async function connectDB() {
       bufferCommands: false,
     }
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(getMongoUri(), opts).then((mongoose) => {
       return mongoose
     })
   }

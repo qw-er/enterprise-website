@@ -8,6 +8,7 @@
     "build": "nuxt build",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "seed:products": "node scripts/seed-products.js",
     "postinstall": "nuxt prepare"
   },
   "keywords": [],
